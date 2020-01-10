@@ -18,7 +18,7 @@ struct _client
 	char name[40];
 } tcpClients[4];
 
-int nbClients;
+int nbClients = 0;
 int fsmServer;
 int deck[13] = {0,1,2,3,4,5,6,7,8,9,10,11,12};
 int tableCartes[4][8];
@@ -81,7 +81,7 @@ void createTable()
 					tableCartes[i][5]++;
 					break;
 				case 2: // Inspector Lestrade
-					tartes[i][3]++;
+					tableCartes[i][3]++;
 					tableCartes[i][6]++;
 					tableCartes[i][4]++;
 					break;
@@ -167,10 +167,10 @@ int findClientByName(char *name)
 	for (i = 0; i < nbClients; i++)
 		if (strcmp(tcpClients[i].name, name) == 0)
 			return i;
-  return -1;
+	return -1;
 }
 
-void sendMessageToClient(char *clientip,int clientport,char *mess)
+void sendMessageToClient(char *clientip, int clientport, char *mess)
 {
 	int sockfd, portno, n;
 	struct sockaddr_in serv_addr;
@@ -233,15 +233,15 @@ int main(int argc, char *argv[])
 	}
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
-	error("ERROR opening socket");
+		error("ERROR opening socket");
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 	portno = atoi(argv[1]);
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
 	if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-	error("ERROR on binding");
-	listen(sockfd,5);
+		error("ERROR on binding");
+	listen(sockfd, 5);
 	clilen = sizeof(cli_addr);
 
 	printDeck();
@@ -261,17 +261,17 @@ int main(int argc, char *argv[])
 	{
 		newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
-		error("ERROR on accept");
+			error("ERROR on accept");
 
 		bzero(buffer, 256);
 		n = read(newsockfd, buffer, 255);
 		if (n < 0)
-		error("ERROR reading from socket");
+			error("ERROR reading from socket");
 
 		printf("Received packet from %s:%d\nData: [%s]\n\n",
-		inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
+			inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
 
-		if (fsmServer == 0)
+		if (fsmServer == 0) //4 joueurs pas encore connectés
 		{
 			switch (buffer[0])
 			{
@@ -288,12 +288,10 @@ int main(int argc, char *argv[])
 					printClients();
 
 					// rechercher l'id du joueur qui vient de se connecter
-
 					id = findClientByName(clientName);
 					printf("id=%d\n", id);
 
 					// lui envoyer un message personnel pour lui communiquer son id
-
 					sprintf(reply, "I %d", id);
 					sendMessageToClient(tcpClients[id].ipAddress,
 						tcpClients[id].port,
@@ -301,7 +299,6 @@ int main(int argc, char *argv[])
 
 					// Envoyer un message broadcast pour communiquer a tout le monde la liste des joueurs actuellement
 					// connectes
-
 					sprintf(reply, "L %s %s %s %s", tcpClients[0].name, tcpClients[1].name, tcpClients[2].name, tcpClients[3].name);
 					broadcastMessage(reply);
 
@@ -310,7 +307,7 @@ int main(int argc, char *argv[])
 					if (nbClients==4)
 					{
 						// RAJOUTER DU CODE ICI
-						/*
+
 						// En résumé, on envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
 						sprintf(reply,"I %d",id);
 						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
@@ -329,31 +326,31 @@ int main(int argc, char *argv[])
 						// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
 						sprintf(reply,"I %d",id);
 						broadcastMessage(reply);
-						*/
+
 						fsmServer = 1;
 					}
 					break;
-				}
 			}
-			else if (fsmServer==1)
-			{
-				switch (buffer[0])
-				{
-					case 'G':
-						// RAJOUTER DU CODE ICI
-						break;
-					case 'O':
-						// RAJOUTER DU CODE ICI
-						break;
-					case 'S':
-						// RAJOUTER DU CODE ICI
-						break;
-					default:
-						break;
-				}
-			}
-			close(newsockfd);
 		}
-		close(sockfd);
-		return 0;
+		else if (fsmServer==1)
+		{
+			switch (buffer[0])
+			{
+				case 'G':
+					// RAJOUTER DU CODE ICI
+					break;
+				case 'O':
+					// RAJOUTER DU CODE ICI
+					break;
+				case 'S':
+					// RAJOUTER DU CODE ICI
+					break;
+				default:
+					break;
+			}
+		}
+		close(newsockfd);
 	}
+	close(sockfd);
+	return 0;
+}

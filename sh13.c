@@ -55,13 +55,13 @@ void *fn_serveur_tcp(void *arg)
 	serv_addr.sin_family = AF_INET;
 	serv_addr.sin_addr.s_addr = INADDR_ANY;
 	serv_addr.sin_port = htons(portno);
-	if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
+	if ( bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0 )
 	{
 		printf("bind error\n");
 		exit(1);
 	}
 
-	listen(sockfd,5);
+	listen(sockfd, 5);
 	clilen = sizeof(cli_addr);
 	while (1)
 	{
@@ -72,8 +72,8 @@ void *fn_serveur_tcp(void *arg)
 			exit(1);
 		}
 
-		bzero(gbuffer,256);
-		n = read(newsockfd,gbuffer,255);
+		bzero(gbuffer, 256);
+		n = read(newsockfd, gbuffer, 255);
 		if (n < 0)
 		{
 			printf("read error\n");
@@ -81,7 +81,7 @@ void *fn_serveur_tcp(void *arg)
 		}
 		//printf("%s",gbuffer);
 
-		synchro=1;
+		synchro = 1;
 
 		while (synchro);
 
@@ -207,11 +207,11 @@ int main(int argc, char ** argv)
 	b[2] = -1;
 
 	for (i = 0; i < 13; i++)
-	guiltGuess[i] = 0;
+		guiltGuess[i] = 0;
 
 	for (i = 0; i < 4; i++)
-	for (j = 0; j < 8; j++)
-	tableCartes[i][j] = -1;
+		for (j = 0; j < 8; j++)
+			tableCartes[i][j] = -1;
 
 	goEnabled = 0;
 	connectEnabled = 1;
@@ -219,9 +219,9 @@ int main(int argc, char ** argv)
 	SDL_Texture *texture_deck[13], *texture_gobutton, *texture_connectbutton, *texture_objet[8];
 
 	for (i = 0; i < 13; i++)
-	texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
+		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
 	for (i = 0; i < 8; i++)
-	texture_objet[i] = SDL_CreateTextureFromSurface(renderer, objet[i]);
+		texture_objet[i] = SDL_CreateTextureFromSurface(renderer, objet[i]);
 
 	texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
 	texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
@@ -232,7 +232,7 @@ int main(int argc, char ** argv)
 	/* Creation du thread serveur tcp. */
 	printf ("Creation du thread serveur tcp !\n");
 	synchro = 0;
-	ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL);
+	ret = pthread_create ( & thread_serveur_tcp_id, NULL, fn_serveur_tcp, NULL );
 
 	while (!quit)
 	{
@@ -242,75 +242,84 @@ int main(int argc, char ** argv)
 			switch (event.type)
 			{
 				case SDL_QUIT:
-				quit = 1;
-				break;
-				caseSDL_MOUSEBUTTONDOWN:
-				SDL_GetMouseState( &mx, &my );
-				//printf("mx=%d my=%d\n",mx,my);
-				if ((mx<200) && (my<50) && (connectEnabled == 1))
-				{
-					sprintf(sendBuffer, "C %s %d %s", gClientIpAddress, gClientPort, gName);
-
-					// RAJOUTER DU CODE ICI
-
-					connectEnabled = 0;
-				}
-				else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
-				{
-					joueurSel = (my-90)/60;
-					guiltSel = -1;
-				}
-				else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
-				{
-					objetSel = (mx-200)/60;
-					guiltSel = -1;
-				}
-				else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
-				{
-					joueurSel = -1;
-					objetSel = -1;
-					guiltSel = (my-350)/30;
-				}
-				else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
-				{
-					int ind = (my-350)/30;
-					guiltGuess[ind] = 1 - guiltGuess[ind];
-				}
-				else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled == 1))
-				{
-					printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
-					if (guiltSel! = -1)
+					quit = 1;
+					break;
+				case SDL_MOUSEBUTTONDOWN:
+					SDL_GetMouseState( &mx, &my );
+					printf("mx=%d my=%d\n",mx,my);////
+					//appui sur la bouton CONNECT
+					if ((mx<200) && (my<50) && (connectEnabled == 1))
 					{
-						sprintf(sendBuffer,"G %d %d",gId, guiltSel);
+						sprintf(sendBuffer, "C %s %d %s", gClientIpAddress, gClientPort, gName);
 
 						// RAJOUTER DU CODE ICI
 
+						connectEnabled = 0;
 					}
-					else if ((objetSel! = -1) && (joueurSel == -1))
+					//appui sur un des noms a gauche de la table
+					else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
 					{
-						sprintf(sendBuffer,"O %d %d",gId, objetSel);
-
-						// RAJOUTER DU CODE ICI
-
+						joueurSel = (my-90)/60;
+						guiltSel = -1;
 					}
-					else if ((objetSel! = -1) && (joueurSel! = -1))
+					//appui sur un des objets en haut de la table
+					else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
 					{
-						sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
-
-						// RAJOUTER DU CODE ICI
-
+						objetSel = (mx-200)/60;
+						guiltSel = -1;
 					}
-				}
-				else
-				{
-					joueurSel = -1;
-					objetSel = -1;
-					guiltSel = -1;
-				}
-				break;
-				caseSDL_MOUSEMOTION:
-				SDL_GetMouseState( &mx, &my );
-				break;
+					//appui sur un des noms des personnages de la table de bas
+					else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
+					{
+						joueurSel = -1;
+						objetSel = -1;
+						guiltSel = (my-350)/30;
+					}
+					//cocher un des cases a cote des noms en bas
+					else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
+					{
+						int ind = (my-350)/30;
+						guiltGuess[ind] = 1 - guiltGuess[ind];
+					}
+					//appui sur la bouton GO
+					else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled == 1))
+					{
+						printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
+						//joueur accuse un personnage
+						if (guiltSel != -1)
+						{
+							sprintf(sendBuffer,"G %d %d",gId, guiltSel);
+
+							// RAJOUTER DU CODE ICI
+
+						}
+						//le joueur demande si les autres joueurs ont un objet
+						else if ((objetSel != -1) && (joueurSel == -1))
+						{
+							sprintf(sendBuffer,"O %d %d",gId, objetSel);
+
+							// RAJOUTER DU CODE ICI
+
+						}
+						//le joueur demande la quantite d'objets a un autre joueur
+						else if ((objetSel != -1) && (joueurSel != -1))
+						{
+							sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
+
+							// RAJOUTER DU CODE ICI
+
+						}
+					}
+					else
+					{
+						joueurSel = -1;
+						objetSel = -1;
+						guiltSel = -1;
+					}
+					break;
+				case SDL_MOUSEMOTION:
+					SDL_GetMouseState( &mx, &my );
+					break;
 			}
 		}
 
@@ -324,54 +333,54 @@ int main(int argc, char ** argv)
 			{
 				// Message 'I' : le joueur recoit son Id
 				case 'I':
-				// RAJOUTER DU CODE ICI
-				gId = gbuffer[2] - '0'; //Prendre en compte les espaces
-				break;
+					// RAJOUTER DU CODE ICI
+					gId = gbuffer[2] - '0'; //Prendre en compte les espaces
+					break;
 				// Message 'L' : le joueur recoit la liste des joueurs
 				case 'L':
-				// RAJOUTER DU CODE ICI
-				for(k = 2; k < 256 && i < 4; k++) //On sort si on atteint la taille maximale
-				{								 //où si on a le nom de tous les joueurs
-					if (gbuffer[k] == ' ')
-					{
-						i++; //On passe au nom suivant
-						j = 0;
+					// RAJOUTER DU CODE ICI
+					for(k = 2; k < 256 && i < 4; k++) //On sort si on atteint la taille maximale
+					{								 //où si on a le nom de tous les joueurs
+						if (gbuffer[k] == ' ')
+						{
+							i++; //On passe au nom suivant
+							j = 0;
+						}
+						else
+						{
+							gNames[i][j] = gbuffer[k];
+							j++;
+						}
 					}
-					else
-					{
-						gNames[i][j] = gbuffer[k];
-						j++;
-					}
-				}
-				break;
+					break;
 				// Message 'D' : le joueur recoit ses trois cartes
 				case 'D':
-				// RAJOUTER DU CODE ICI
-				for(k = 0; k < 3; k++)
-				{
-					tableCartes[gId][k]= gbuffer[k];
-					b[k] = gbuffer[k] - '0';
-				}
-				break;
+					// RAJOUTER DU CODE ICI
+					for(k = 0; k < 3; k++)
+					{
+						tableCartes[gId][k]= gbuffer[k];
+						b[k] = gbuffer[k] - '0';
+					}
+					break;
 				// Message 'M' : le joueur recoit le n° du joueur courant
 				// Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
 				case 'M':
-				// RAJOUTER DU CODE ICI
-				if ((gbuffer[2]-'0') == gId)
-				{
-					goEnabled = 1;
-				}
-				else
-				{
-					goEnabled = 0;
-				}
+					// RAJOUTER DU CODE ICI
+					if ((gbuffer[2]-'0') == gId)
+					{
+						goEnabled = 1;
+					}
+					else
+					{
+						goEnabled = 0;
+					}
 
-				break;
+					break;
 				// Message 'V' : le joueur recoit une valeur de tableCartes
 				case 'V':
-				// RAJOUTER DU CODE ICI
+					// RAJOUTER DU CODE ICI
 
-				break;
+					break;
 			}
 			synchro=0;
 		}
@@ -384,21 +393,21 @@ int main(int argc, char ** argv)
 		SDL_Rect rect = {0, 0, 1024, 768};
 		SDL_RenderFillRect(renderer, &rect);
 
-		if (joueurSel! = -1)
+		if (joueurSel != -1)
 		{
 			SDL_SetRenderDrawColor(renderer, 255, 180, 180, 255);
 			SDL_Rect rect1 = {0, 90+joueurSel*60, 200 , 60};
 			SDL_RenderFillRect(renderer, &rect1);
 		}
 
-		if (objetSel! = -1)
+		if (objetSel != -1)
 		{
 			SDL_SetRenderDrawColor(renderer, 180, 255, 180, 255);
 			SDL_Rect rect1 = {200+objetSel*60, 0, 60 , 90};
 			SDL_RenderFillRect(renderer, &rect1);
 		}
 
-		if (guiltSel! = -1)
+		if (guiltSel != -1)
 		{
 			SDL_SetRenderDrawColor(renderer, 180, 180, 255, 255);
 			SDL_Rect rect1 = {100, 350+guiltSel*30, 150 , 30};
@@ -460,7 +469,7 @@ int main(int argc, char ** argv)
 		for (i = 0; i < 4; i++)
 		for (j = 0; j < 8; j++)
 		{
-			if (tableCartes[i][j]! = -1)
+			if (tableCartes[i][j] != -1)
 			{
 				char mess[10];
 				if (tableCartes[i][j] == 100)
@@ -663,17 +672,17 @@ int main(int argc, char ** argv)
 		SDL_RenderDrawLine(renderer, 300,350,300,740);
 
 		//SDL_RenderCopy(renderer, texture_grille, NULL, &dstrect_grille);
-		if (b[0]! = -1)
+		if (b[0] != -1)
 		{
 			SDL_Rect dstrect = { 750, 0, 1000/4, 660/4 };
 			SDL_RenderCopy(renderer, texture_deck[b[0]], NULL, &dstrect);
 		}
-		if (b[1]! = -1)
+		if (b[1] != -1)
 		{
 			SDL_Rect dstrect = { 750, 200, 1000/4, 660/4 };
 			SDL_RenderCopy(renderer, texture_deck[b[1]], NULL, &dstrect);
 		}
-		if (b[2]! = -1)
+		if (b[2] != -1)
 		{
 			SDL_Rect dstrect = { 750, 400, 1000/4, 660/4 };
 			SDL_RenderCopy(renderer, texture_deck[b[2]], NULL, &dstrect);
