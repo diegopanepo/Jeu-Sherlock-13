@@ -105,8 +105,8 @@ void sendMessageToServer(char *ipAddress, int portno, char *mess)
 	bzero((char *) &serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
 	bcopy((char *)server->h_addr,
-	(char *)&serv_addr.sin_addr.s_addr,
-	server->h_length);
+		(char *)&serv_addr.sin_addr.s_addr,
+		server->h_length);
 	serv_addr.sin_port = htons(portno);
 	if (connect(sockfd,(struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
 	{
@@ -144,6 +144,9 @@ int main(int argc, char ** argv)
 	char sendBuffer[256];
 	char lname[256];
 	int id;
+
+	char code;
+	int joueurCourant;
 
 	if (argc<6)
 	{
@@ -246,12 +249,13 @@ int main(int argc, char ** argv)
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetMouseState( &mx, &my );
-					printf("mx=%d my=%d\n",mx,my);////
+					//printf("mx=%d my=%d\n",mx,my);////
 					//appui sur la bouton CONNECT
 					if ((mx<200) && (my<50) && (connectEnabled == 1))
 					{
 						sprintf(sendBuffer, "C %s %d %s", gClientIpAddress, gClientPort, gName);
 
+						sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 						// RAJOUTER DU CODE ICI
 
 						connectEnabled = 0;
@@ -334,11 +338,15 @@ int main(int argc, char ** argv)
 				// Message 'I' : le joueur recoit son Id
 				case 'I':
 					// RAJOUTER DU CODE ICI
-					gId = gbuffer[2] - '0'; //Prendre en compte les espaces
+					//gId = gbuffer[2] - '0'; //Prendre en compte les espaces //sscanf
+					sscanf(gbuffer, "%c %d", &code, &gId);
+					printf("Id = %d\n", gId);
 					break;
 				// Message 'L' : le joueur recoit la liste des joueurs
 				case 'L':
 					// RAJOUTER DU CODE ICI
+					sscanf(gbuffer, "%c %s %s %s %s", &code, gNames[0], gNames[1],
+						gNames[2], gNames[3]);/*
 					for(k = 2; k < 256 && i < 4; k++) //On sort si on atteint la taille maximale
 					{								 //où si on a le nom de tous les joueurs
 						if (gbuffer[k] == ' ')
@@ -351,30 +359,31 @@ int main(int argc, char ** argv)
 							gNames[i][j] = gbuffer[k];
 							j++;
 						}
-					}
+					}*/
 					break;
 				// Message 'D' : le joueur recoit ses trois cartes
 				case 'D':
 					// RAJOUTER DU CODE ICI
+					sscanf(gbuffer, "%c %d %d %d", &code, &b[0], &b[1], &b[2]);/*
 					for(k = 0; k < 3; k++)
 					{
 						tableCartes[gId][k]= gbuffer[k];
 						b[k] = gbuffer[k] - '0';
-					}
+					}*/
+					printf("Vos cartes sont :\n");
+					for(int krt = 0; krt < 3; krt++)
+						printf("%d %s\n", b[krt], nbnoms[b[krt]]);
 					break;
 				// Message 'M' : le joueur recoit le n° du joueur courant
 				// Cela permet d'affecter goEnabled pour autoriser l'affichage du bouton go
 				case 'M':
 					// RAJOUTER DU CODE ICI
-					if ((gbuffer[2]-'0') == gId)
-					{
+					sscanf(gbuffer, "%c %d", &code, &joueurCourant);
+					if (joueurCourant == gId)
 						goEnabled = 1;
-					}
 					else
-					{
 						goEnabled = 0;
-					}
-
+					printf("Le joueur courant est %s", gNames[joueurCourant]);
 					break;
 				// Message 'V' : le joueur recoit une valeur de tableCartes
 				case 'V':
