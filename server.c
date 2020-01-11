@@ -311,8 +311,7 @@ int main(int argc, char *argv[])
 
 					if (nbClients==4)
 					{
-						// RAJOUTER DU CODE ICI
-/*
+						/*
 						// En résumé, on envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
 						sprintf(reply,"D %d %d %d", deck[0], deck[1], deck[2]);
 						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
@@ -327,7 +326,7 @@ int main(int argc, char *argv[])
 						// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
 						sprintf(reply,"D %d %d %d", deck[9], deck[10], deck[11]);
 						sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
-*/
+						*/
 						for(i = 0; i < 4; i++)
 						{
 							sprintf(reply, "D %d %d %d %d %d %d %d %d %d %d %d", deck[i*3], deck[i*3+1], deck[i*3+2],
@@ -350,8 +349,8 @@ int main(int argc, char *argv[])
 			switch (buffer[0])
 			{
 				case 'G':
-					//joueur accuse un personnage
-					// RAJOUTER DU CODE ICI
+				// joueur accuse un personnage
+				// a tester
 					sscanf(buffer, "%c %d %d", &com, &id, &aux);
 					printf("COM=%c IdJoueur=%d personnage=%d\n", com, id, aux);
 					if(aux == deck[12])
@@ -369,8 +368,8 @@ int main(int argc, char *argv[])
 					}
 					break;
 				case 'O':
-					//le joueur demande si les autres joueurs ont un objet
-					// RAJOUTER DU CODE ICI
+				// le joueur demande si les autres joueurs ont un objet
+				// a tester
 					sscanf(buffer, "%c %d %d", &com, &id, &aux);
 					printf("COM=%c IdJoueur=%d objet=%d\n", com, id, aux);
 					bzero(buffer, 256);
@@ -386,8 +385,8 @@ int main(int argc, char *argv[])
 					broadcastMessage(reply);
 					break;
 				case 'S':
-					//le joueur demande la quantite d'objets a un autre joueur
-					// RAJOUTER DU CODE ICI
+				// le joueur demande la quantite d'objets a un autre joueur
+				// a tester
 					sscanf(buffer, "%c %d %d %d", &com, &id, &aux, &aux2);
 					printf("COM=%c IdJoueur=%d joueurCible=%d objet=%d\n", com, id, aux, aux2);
 					sprintf(reply, "V %d", tableCartes[aux][aux2] ? 1 : 0);
