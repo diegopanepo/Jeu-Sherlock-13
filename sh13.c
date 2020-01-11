@@ -33,6 +33,8 @@ char *nbnoms[] = {"Sebastian Moran", "irene Adler", "inspector Lestrade",
 "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
 "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
 "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
+char *nomobjets[] =
+{"pipe", "ampoule", "poing", "couronne", "carnet", "collier", "oeil", "crane"};
 
 volatile int synchro;
 
@@ -250,68 +252,65 @@ int main(int argc, char ** argv)
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetMouseState( &mx, &my );
 					//printf("mx=%d my=%d\n",mx,my);////
-					//appui sur la bouton CONNECT
 					if ((mx<200) && (my<50) && (connectEnabled == 1))
 					{
-						sprintf(sendBuffer, "C %s %d %s", gClientIpAddress, gClientPort, gName);
-
-						sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
+						//appui sur la bouton CONNECT
 						// RAJOUTER DU CODE ICI
+						sprintf(sendBuffer, "C %s %d %s", gClientIpAddress, gClientPort, gName);
+						sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 
 						connectEnabled = 0;
 					}
-					//appui sur un des noms a gauche de la table
 					else if ((mx>=0) && (mx<200) && (my>=90) && (my<330))
 					{
+						//appui sur un des noms a gauche de la table
 						joueurSel = (my-90)/60;
 						guiltSel = -1;
 					}
-					//appui sur un des objets en haut de la table
 					else if ((mx>=200) && (mx<680) && (my>=0) && (my<90))
 					{
+						//appui sur un des objets en haut de la table
 						objetSel = (mx-200)/60;
 						guiltSel = -1;
 					}
-					//appui sur un des noms des personnages de la table de bas
 					else if ((mx>=100) && (mx<250) && (my>=350) && (my<740))
 					{
+						//appui sur un des noms des personnages de la table de bas
 						joueurSel = -1;
 						objetSel = -1;
 						guiltSel = (my-350)/30;
 					}
-					//cocher un des cases a cote des noms en bas
 					else if ((mx>=250) && (mx<300) && (my>=350) && (my<740))
 					{
+						//cocher un des cases a cote des noms en bas
 						int ind = (my-350)/30;
 						guiltGuess[ind] = 1 - guiltGuess[ind];
 					}
-					//appui sur la bouton GO
 					else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled == 1))
 					{
+						//appui sur la bouton GO
 						printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
-						//joueur accuse un personnage
 						if (guiltSel != -1)
 						{
-							sprintf(sendBuffer,"G %d %d",gId, guiltSel);
-
+							//le joueur accuse un personnage
 							// RAJOUTER DU CODE ICI
-
+							sprintf(sendBuffer,"G %d %d", gId, guiltSel);
+							sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 						}
-						//le joueur demande si les autres joueurs ont un objet
 						else if ((objetSel != -1) && (joueurSel == -1))
 						{
-							sprintf(sendBuffer,"O %d %d",gId, objetSel);
-
+							//le joueur demande si les autres joueurs ont un objet
 							// RAJOUTER DU CODE ICI
+							sprintf(sendBuffer,"O %d %d", gId, objetSel);
+							sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 
 						}
-						//le joueur demande la quantite d'objets a un autre joueur
 						else if ((objetSel != -1) && (joueurSel != -1))
 						{
-							sprintf(sendBuffer,"S %d %d %d",gId, joueurSel,objetSel);
-
+							//le joueur demande la quantite d'objets a un autre joueur
 							// RAJOUTER DU CODE ICI
-
+							sprintf(sendBuffer,"S %d %d %d", gId, joueurSel, objetSel);
+							sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 						}
 					}
 					else
@@ -330,9 +329,9 @@ int main(int argc, char ** argv)
 		if (synchro == 1)
 		{
 			printf("consomme |%s|\n",gbuffer);
-			int k = 0; //indice dans le buffer
+			/*int k = 0; //indice dans le buffer
 			int i = 0; //indice joueur
-			int j = 0; //indice dans le nom
+			int j = 0; //indice dans le nom*/
 			switch (gbuffer[0])
 			{
 				// Message 'I' : le joueur recoit son Id
@@ -383,11 +382,19 @@ int main(int argc, char ** argv)
 						goEnabled = 1;
 					else
 						goEnabled = 0;
-					printf("Le joueur courant est %s", gNames[joueurCourant]);
+					printf("Le joueur courant est %s\n", gNames[joueurCourant]);
 					break;
 				// Message 'V' : le joueur recoit une valeur de tableCartes
 				case 'V':
 					// RAJOUTER DU CODE ICI
+
+					break;
+				// Message 'R' : resultat de l'accusation final d'un joueur
+				case 'R':
+
+					break;
+				// Message 'o' : reponse de la demande d'objet a tout le monde
+				case 'o':
 
 					break;
 			}
@@ -476,29 +483,29 @@ int main(int argc, char ** argv)
 		}
 
 		for (i = 0; i < 4; i++)
-		for (j = 0; j < 8; j++)
-		{
-			if (tableCartes[i][j] != -1)
+			for (j = 0; j < 8; j++)
 			{
-				char mess[10];
-				if (tableCartes[i][j] == 100)
-				sprintf(mess,"*");
-				else
-				sprintf(mess,"%d",tableCartes[i][j]);
-				SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, mess, col1);
-				SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
+				if (tableCartes[i][j] != -1)
+				{
+					char mess[10];
+					if (tableCartes[i][j] == 100)
+					sprintf(mess,"*");
+					else
+					sprintf(mess,"%d",tableCartes[i][j]);
+					SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, mess, col1);
+					SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 
-				SDL_Rect Message_rect;
-				Message_rect.x = 230+j*60;
-				Message_rect.y = 110+i*60;
-				Message_rect.w = surfaceMessage->w;
-				Message_rect.h = surfaceMessage->h;
+					SDL_Rect Message_rect;
+					Message_rect.x = 230+j*60;
+					Message_rect.y = 110+i*60;
+					Message_rect.w = surfaceMessage->w;
+					Message_rect.h = surfaceMessage->h;
 
-				SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
-				SDL_DestroyTexture(Message);
-				SDL_FreeSurface(surfaceMessage);
+					SDL_RenderCopy(renderer, Message, NULL, &Message_rect);
+					SDL_DestroyTexture(Message);
+					SDL_FreeSurface(surfaceMessage);
+				}
 			}
-		}
 
 
 		// Sebastian Moran

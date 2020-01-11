@@ -27,6 +27,9 @@ char *nomcartes[] =
 "inspector Gregson", "inspector Baynes", "inspector Bradstreet",
 "inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
 "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
+char *nomobjets[] =
+{"pipe", "ampoule", "poing", "couronne", "carnet", "collier", "oeil", "crane"};
+//char *objetparperso[] = {"72","715","364",""}
 int joueurCourant;
 
 void error(const char *msg)
@@ -157,7 +160,7 @@ void printClients()
 	for (i = 0; i < nbClients; i++)
 		printf("%d: %s %5.5d %s\n", i, tcpClients[i].ipAddress,
 		tcpClients[i].port,
-		tcpClients[i].name);
+	tcpClients[i].name);
 }
 
 int findClientByName(char *name)
@@ -226,6 +229,7 @@ int main(int argc, char *argv[])
 	int clientPort;
 	int id;
 	char reply[256];
+	int aux, aux2;
 
 	if (argc < 2) {
 		fprintf(stderr, "ERROR, no port provided\n");
@@ -308,7 +312,7 @@ int main(int argc, char *argv[])
 					if (nbClients==4)
 					{
 						// RAJOUTER DU CODE ICI
-
+/*
 						// En résumé, on envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
 						sprintf(reply,"D %d %d %d", deck[0], deck[1], deck[2]);
 						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
@@ -323,6 +327,14 @@ int main(int argc, char *argv[])
 						// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
 						sprintf(reply,"D %d %d %d", deck[9], deck[10], deck[11]);
 						sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
+*/
+						for(i = 0; i < 4; i++)
+						{
+							sprintf(reply, "D %d %d %d %d %d %d %d %d %d %d %d", deck[i*3], deck[i*3+1], deck[i*3+2],
+								tableCartes[i][0], tableCartes[i][1], tableCartes[i][2],tableCartes[i][3],
+								tableCartes[i][4], tableCartes[i][5], tableCartes[i][6], tableCartes[i][7]);
+							sendMessageToClient(tcpClients[i].ipAddress, tcpClients[i].port, reply);
+						}
 
 						// On envoie enfin un message a tout le monde pour definir qui est le joueur courant=0
 						sprintf(reply,"M %d", joueurCourant);
@@ -338,13 +350,48 @@ int main(int argc, char *argv[])
 			switch (buffer[0])
 			{
 				case 'G':
+					//joueur accuse un personnage
 					// RAJOUTER DU CODE ICI
+					sscanf(buffer, "%c %d %d", &com, &id, &aux);
+					printf("COM=%c IdJoueur=%d personnage=%d\n", com, id, aux);
+					if(aux == deck[12])
+					{
+						printf("Le joueur %s a gagne la partie !", tcpClients[id].name);
+						sprintf(reply, "R %d %d 1", id, aux);
+						broadcastMessage(reply);
+					}
+					else
+					{
+						printf("Le joueur %s s'est trompe avec son accusation", tcpClients[id].name);
+						sprintf(reply, "R %d %d 0", id, aux);
+						broadcastMessage(reply);
+						//ajouter l'option de ne plus laisser jouer au joueur id
+					}
 					break;
 				case 'O':
+					//le joueur demande si les autres joueurs ont un objet
 					// RAJOUTER DU CODE ICI
+					sscanf(buffer, "%c %d %d", &com, &id, &aux);
+					printf("COM=%c IdJoueur=%d objet=%d\n", com, id, aux);
+					bzero(buffer, 256);
+					for(i = 0; i < 4; i++)
+					{
+						if(i != id)
+						{
+							strcat(buffer, tableCartes[i][aux] ? "1" : "0");
+							strcat(buffer, " ");
+						}
+					}
+					sprintf(reply, "o %d %d %s", id, aux, buffer);
+					broadcastMessage(reply);
 					break;
 				case 'S':
+					//le joueur demande la quantite d'objets a un autre joueur
 					// RAJOUTER DU CODE ICI
+					sscanf(buffer, "%c %d %d %d", &com, &id, &aux, &aux2);
+					printf("COM=%c IdJoueur=%d joueurCible=%d objet=%d\n", com, id, aux, aux2);
+					sprintf(reply, "V %d", tableCartes[aux][aux2] ? 1 : 0);
+					sendMessageToClient(tcpClients[id].ipAddress, tcpClients[id].port, reply);
 					break;
 				default:
 					break;
