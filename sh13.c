@@ -366,6 +366,9 @@ int main(int argc, char ** argv)
 				// Message 'V' : le joueur recoit une valeur de tableCartes
 				// RAJOUTER DU CODE ICI
 
+				
+
+
 					break;
 				case 'R':
 				// Message 'R' : resultat de l'accusation final d'un joueur
