@@ -146,6 +146,8 @@ int main(int argc, char ** argv)
 	char sendBuffer[256];
 	char lname[256];
 	int id;
+	int aux, aux2;
+	int nb[4];
 
 	char code;
 	int joueurCourant;
@@ -328,7 +330,7 @@ int main(int argc, char ** argv)
 
 		if (synchro == 1)
 		{
-			printf("consomme |%s|\n",gbuffer);
+			//printf("Message server |%s|\n",gbuffer);
 			switch (gbuffer[0])
 			{
 				case 'I':
@@ -342,6 +344,8 @@ int main(int argc, char ** argv)
 				// AMELIORER POUR SPECIFIER TOUS LES NOMS DE LA LISTE
 					sscanf(gbuffer, "%c %s %s %s %s", &code, gNames[0], gNames[1],
 						gNames[2], gNames[3]);
+					printf("Joueurs :\n1) %s\n2) %s\n3) %s\n4) %s\n\n", gNames[0],
+						gNames[1], gNames[2], gNames[3]);
 					break;
 				case 'D':
 				// Message 'D' : le joueur recoit ses trois cartes
@@ -365,16 +369,46 @@ int main(int argc, char ** argv)
 				case 'V':
 				// Message 'V' : le joueur recoit une valeur de tableCartes
 				// RAJOUTER DU CODE ICI
-
+					sscanf(gbuffer, "%c %d %d %d", &code, &aux, &id, &aux2); // carte joueurcible objet
+					tableCartes[id][aux2] = aux;
+					if(aux)
+					{
+						printf("Le joueur %s avait l'objet %s\n\n", gNames[id], nomobjets[aux2]);
+					}
+					else
+					{
+						printf("Le joueur %s n'avait pas l'objet %s\n\n", gNames[id], nomobjets[aux2]);
+					}
 					break;
 				case 'R':
 				// Message 'R' : resultat de l'accusation final d'un joueur
 				// RAJOUTER DU CODE ICI
+					sscanf(gbuffer, "%c %d %d %d", &code, &id, &aux, &aux2); // personnage 1/0
+					if(aux2)
+					{
+						printf("Le joueur %s a gagne la partie !\n\n", gNames[id]);
+						//la partie est finie
+					}
+					else
+					{
+						printf("Le joueur %s n'a pas demasque le tueur\nLa partie continue\n\n",
+						gNames[id]);
+						//le joueur ne joue plus
+					}
 
 					break;
 				case 'o':
 				// Message 'o' : reponse de la demande d'objet a tout le monde
 				// RAJOUTER DU CODE ICI
+					sscanf(gbuffer, "%c %d %d %d %d %d %d", &code, &id, &aux, //objet
+						&nb[0], &nb[1], &nb[2], &nb[3]);
+					for(int i = 0; i < 4; i++)
+					{
+						if(i != aux)
+						{
+							tableCartes[i][aux] = nb[i];
+						}
+					}
 
 					break;
 			}
@@ -469,9 +503,9 @@ int main(int argc, char ** argv)
 				{
 					char mess[10];
 					if (tableCartes[i][j] == 100)
-					sprintf(mess,"*");
+						sprintf(mess,"*");
 					else
-					sprintf(mess,"%d",tableCartes[i][j]);
+						sprintf(mess,"%d",tableCartes[i][j]);
 					SDL_Surface* surfaceMessage = TTF_RenderText_Solid(Sans, mess, col1);
 					SDL_Texture* Message = SDL_CreateTextureFromSurface(renderer, surfaceMessage);
 

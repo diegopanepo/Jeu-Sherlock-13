@@ -223,6 +223,7 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serv_addr, cli_addr;
 	int n;
 	int i;
+	int nb[4];
 
 	char com;
 	char clientIpAddress[256], clientName[256];
@@ -266,7 +267,7 @@ int main(int argc, char *argv[])
 		newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
-		printf("accepted\n");
+		printf("\nConnextion accepte\n");
 
 		bzero(buffer, 256);
 		n = read(newsockfd, buffer, 255);
@@ -377,11 +378,13 @@ int main(int argc, char *argv[])
 					{
 						if(i != id)
 						{
-							strcat(buffer, tableCartes[i][aux] ? "1" : "0");
-							strcat(buffer, " ");
+							nb[i] = tableCartes[i][aux] ? 1 : 0;
+							//strcat(buffer, " ");
 						}
+						else
+							nb[i] = -1;
 					}
-					sprintf(reply, "o %d %d %s", id, aux, buffer);
+					sprintf(reply, "o %d %d %d %d %d %d", id, aux, nb[0], nb[1], nb[2], nb[3]);
 					broadcastMessage(reply);
 					break;
 				case 'S':
@@ -389,12 +392,17 @@ int main(int argc, char *argv[])
 				// a tester
 					sscanf(buffer, "%c %d %d %d", &com, &id, &aux, &aux2);
 					printf("COM=%c IdJoueur=%d joueurCible=%d objet=%d\n", com, id, aux, aux2);
-					sprintf(reply, "V %d", tableCartes[aux][aux2] ? 1 : 0);
+					sprintf(reply, "V %d %d %d", tableCartes[aux][aux2], aux, aux2);
 					sendMessageToClient(tcpClients[id].ipAddress, tcpClients[id].port, reply);
 					break;
 				default:
 					break;
 			}
+			joueurCourant++;
+			if(joueurCourant > 3)
+				joueurCourant = 0;
+			sprintf(reply,"M %d", joueurCourant);
+			broadcastMessage(reply);
 		}
 		close(newsockfd);
 	}
