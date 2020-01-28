@@ -291,7 +291,7 @@ int main(int argc, char ** argv)
 					else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled == 1))
 					{
 						//appui sur la bouton GO
-						printf("go! joueur=%d objet=%d guilt=%d\n",joueurSel, objetSel, guiltSel);
+						printf("go! joueur=%d objet=%d guilt=%d\n\n",joueurSel, objetSel, guiltSel);
 						if (guiltSel != -1)
 						{
 							//le joueur accuse un personnage
@@ -344,12 +344,21 @@ int main(int argc, char ** argv)
 				// AMELIORER POUR SPECIFIER TOUS LES NOMS DE LA LISTE
 					sscanf(gbuffer, "%c %s %s %s %s", &code, gNames[0], gNames[1],
 						gNames[2], gNames[3]);
+					//gNames[gId] = strcat("*", gNames[gId]);
+					for(i = strlen(gNames[gId]); i > 0; i--)
+					{
+						gNames[gId][i] = gNames[gId][i-1];
+					}
+					gNames[gId][0] = '*';
 					printf("Joueurs :\n1) %s\n2) %s\n3) %s\n4) %s\n\n", gNames[0],
 						gNames[1], gNames[2], gNames[3]);
 					break;
 				case 'D':
 				// Message 'D' : le joueur recoit ses trois cartes
-					sscanf(gbuffer, "%c %d %d %d", &code, &b[0], &b[1], &b[2]);
+					sscanf(gbuffer, "%c %d %d %d %d %d %d %d %d %d %d %d", &code,
+					 	&b[0], &b[1], &b[2], &tableCartes[gId][0], &tableCartes[gId][1],
+						&tableCartes[gId][2], &tableCartes[gId][3], &tableCartes[gId][4],
+						&tableCartes[gId][5], &tableCartes[gId][6], &tableCartes[gId][7]);
 					//mettre a jour: mtn on a les nombres d'objets qu'on a (8 chiffres)
 					printf("Vos cartes sont :\n");
 					for(int krt = 0; krt < 3; krt++)
@@ -372,13 +381,9 @@ int main(int argc, char ** argv)
 					sscanf(gbuffer, "%c %d %d %d", &code, &aux, &id, &aux2); // carte joueurcible objet
 					tableCartes[id][aux2] = aux;
 					if(aux)
-					{
 						printf("Le joueur %s avait l'objet %s\n\n", gNames[id], nomobjets[aux2]);
-					}
 					else
-					{
 						printf("Le joueur %s n'avait pas l'objet %s\n\n", gNames[id], nomobjets[aux2]);
-					}
 					break;
 				case 'R':
 				// Message 'R' : resultat de l'accusation final d'un joueur
@@ -387,12 +392,14 @@ int main(int argc, char ** argv)
 					if(aux2)
 					{
 						printf("Le joueur %s a gagne la partie !\n\n", gNames[id]);
+						synchro = 0;
+						goEnabled = 0;
 						//la partie est finie
 					}
 					else
 					{
 						printf("Le joueur %s n'a pas demasque le tueur\nLa partie continue\n\n",
-						gNames[id]);
+							gNames[id]);
 						//le joueur ne joue plus
 					}
 
@@ -402,11 +409,14 @@ int main(int argc, char ** argv)
 				// RAJOUTER DU CODE ICI
 					sscanf(gbuffer, "%c %d %d %d %d %d %d", &code, &id, &aux, //objet
 						&nb[0], &nb[1], &nb[2], &nb[3]);
-					for(int i = 0; i < 4; i++)
+					for(i = 0; i < 4; i++)
 					{
-						if(i != aux)
+						if(i != id && i != gId)
 						{
-							tableCartes[i][aux] = nb[i];
+							if(nb[i])
+								tableCartes[i][aux] = 100;
+							else
+								tableCartes[i][aux] = 0;
 						}
 					}
 

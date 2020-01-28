@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 		if (n < 0)
 			error("ERROR reading from socket");
 
-		printf("Received packet from %s:%d\nData: [%s]\n\n",
+		printf("Received packet from %s:%d\nData: [%s\b]\n\n",
 			inet_ntoa(cli_addr.sin_addr), ntohs(cli_addr.sin_port), buffer);
 
 		if (fsmServer == 0) //4 joueurs pas encore connectés
@@ -312,22 +312,7 @@ int main(int argc, char *argv[])
 
 					if (nbClients==4)
 					{
-						/*
-						// En résumé, on envoie ses cartes au joueur 0, ainsi que la ligne qui lui correspond dans tableCartes
-						sprintf(reply,"D %d %d %d", deck[0], deck[1], deck[2]);
-						sendMessageToClient(tcpClients[0].ipAddress, tcpClients[0].port, reply);
-						// On envoie ses cartes au joueur 1, ainsi que la ligne qui lui correspond dans tableCartes
-						sprintf(reply,"D %d %d %d", deck[3], deck[4], deck[5]);
-						sendMessageToClient(tcpClients[1].ipAddress, tcpClients[1].port, reply);
-
-						// On envoie ses cartes au joueur 2, ainsi que la ligne qui lui correspond dans tableCartes
-						sprintf(reply,"D %d %d %d", deck[6], deck[7], deck[8]);
-						sendMessageToClient(tcpClients[2].ipAddress, tcpClients[2].port, reply);
-
-						// On envoie ses cartes au joueur 3, ainsi que la ligne qui lui correspond dans tableCartes
-						sprintf(reply,"D %d %d %d", deck[9], deck[10], deck[11]);
-						sendMessageToClient(tcpClients[3].ipAddress, tcpClients[3].port, reply);
-						*/
+						// En résumé, on envoie ses cartes au joueur, ainsi que la ligne qui lui correspond dans tableCartes
 						for(i = 0; i < 4; i++)
 						{
 							sprintf(reply, "D %d %d %d %d %d %d %d %d %d %d %d", deck[i*3], deck[i*3+1], deck[i*3+2],
@@ -358,29 +343,26 @@ int main(int argc, char *argv[])
 					{
 						printf("Le joueur %s a gagne la partie !", tcpClients[id].name);
 						sprintf(reply, "R %d %d 1", id, aux);
-						broadcastMessage(reply);
+						fsmServer = -1;
 					}
 					else
 					{
 						printf("Le joueur %s s'est trompe avec son accusation", tcpClients[id].name);
 						sprintf(reply, "R %d %d 0", id, aux);
-						broadcastMessage(reply);
 						//ajouter l'option de ne plus laisser jouer au joueur id
 					}
+					broadcastMessage(reply);
 					break;
 				case 'O':
 				// le joueur demande si les autres joueurs ont un objet
 				// a tester
 					sscanf(buffer, "%c %d %d", &com, &id, &aux);
 					printf("COM=%c IdJoueur=%d objet=%d\n", com, id, aux);
-					bzero(buffer, 256);
+					//bzero(buffer, 256);
 					for(i = 0; i < 4; i++)
 					{
 						if(i != id)
-						{
 							nb[i] = tableCartes[i][aux] ? 1 : 0;
-							//strcat(buffer, " ");
-						}
 						else
 							nb[i] = -1;
 					}
