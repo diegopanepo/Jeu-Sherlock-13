@@ -29,9 +29,9 @@ int goEnabled;
 int connectEnabled;
 
 char *nbobjets[] = {"5","5","5","5","4","3","3","3"};
-char *nbnoms[] = {"Sebastian Moran", "irene Adler", "inspector Lestrade",
-"inspector Gregson", "inspector Baynes", "inspector Bradstreet",
-"inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
+char *nbnoms[] = {"Sebastian Moran", "Irene Adler", "Inspector Lestrade",
+"Inspector Gregson", "Inspector Baynes", "Inspector Bradstreet",
+"Inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
 "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
 char *nomobjets[] =
 {"pipe", "ampoule", "poing", "couronne", "carnet", "collier", "oeil", "crane"};
@@ -257,7 +257,6 @@ int main(int argc, char ** argv)
 					if ((mx<200) && (my<50) && (connectEnabled == 1))
 					{
 						//appui sur la bouton CONNECT
-						// RAJOUTER DU CODE ICI
 						sprintf(sendBuffer, "C %s %d %s", gClientIpAddress, gClientPort, gName);
 						sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 
@@ -295,14 +294,12 @@ int main(int argc, char ** argv)
 						if (guiltSel != -1)
 						{
 							//le joueur accuse un personnage
-							// RAJOUTER DU CODE ICI
 							sprintf(sendBuffer,"G %d %d", gId, guiltSel);
 							sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 						}
 						else if ((objetSel != -1) && (joueurSel == -1))
 						{
 							//le joueur demande si les autres joueurs ont un objet
-							// RAJOUTER DU CODE ICI
 							sprintf(sendBuffer,"O %d %d", gId, objetSel);
 							sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 
@@ -310,7 +307,6 @@ int main(int argc, char ** argv)
 						else if ((objetSel != -1) && (joueurSel != -1))
 						{
 							//le joueur demande la quantite d'objets a un autre joueur
-							// RAJOUTER DU CODE ICI
 							sprintf(sendBuffer,"S %d %d %d", gId, joueurSel, objetSel);
 							sendMessageToServer(gServerIpAddress, gServerPort, sendBuffer);
 						}
@@ -340,11 +336,8 @@ int main(int argc, char ** argv)
 					break;
 				case 'L':
 				// Message 'L' : le joueur recoit la liste des joueurs
-				// RAJOUTER DU CODE ICI
-				// AMELIORER POUR SPECIFIER TOUS LES NOMS DE LA LISTE
 					sscanf(gbuffer, "%c %s %s %s %s", &code, gNames[0], gNames[1],
 						gNames[2], gNames[3]);
-					//gNames[gId] = strcat("*", gNames[gId]);
 					for(i = strlen(gNames[gId]); i > 0; i--)
 					{
 						gNames[gId][i] = gNames[gId][i-1];
@@ -359,7 +352,6 @@ int main(int argc, char ** argv)
 					 	&b[0], &b[1], &b[2], &tableCartes[gId][0], &tableCartes[gId][1],
 						&tableCartes[gId][2], &tableCartes[gId][3], &tableCartes[gId][4],
 						&tableCartes[gId][5], &tableCartes[gId][6], &tableCartes[gId][7]);
-					//mettre a jour: mtn on a les nombres d'objets qu'on a (8 chiffres)
 					printf("Vos cartes sont :\n");
 					for(int krt = 0; krt < 3; krt++)
 						printf("%d %s\n", b[krt], nbnoms[b[krt]]);
@@ -377,7 +369,6 @@ int main(int argc, char ** argv)
 					break;
 				case 'V':
 				// Message 'V' : le joueur recoit une valeur de tableCartes
-				// RAJOUTER DU CODE ICI
 					sscanf(gbuffer, "%c %d %d %d", &code, &aux, &id, &aux2); // carte joueurcible objet
 					tableCartes[id][aux2] = aux;
 					if(aux)
@@ -387,12 +378,11 @@ int main(int argc, char ** argv)
 					break;
 				case 'R':
 				// Message 'R' : resultat de l'accusation final d'un joueur
-				// RAJOUTER DU CODE ICI
 					sscanf(gbuffer, "%c %d %d %d", &code, &id, &aux, &aux2); // personnage 1/0
 					if(aux2)
 					{
-						printf("Le joueur %s a gagne la partie !\n\n", gNames[id]);
-						synchro = 0;
+						printf("Le joueur %s a gagne la partie !\n", gNames[id]);
+						printf("Le tueur est %s\n\n", nbnoms[aux]);
 						goEnabled = 0;
 						//la partie est finie
 					}
@@ -406,7 +396,6 @@ int main(int argc, char ** argv)
 					break;
 				case 'o':
 				// Message 'o' : reponse de la demande d'objet a tout le monde
-				// RAJOUTER DU CODE ICI
 					sscanf(gbuffer, "%c %d %d %d %d %d %d", &code, &id, &aux, //objet
 						&nb[0], &nb[1], &nb[2], &nb[3]);
 					for(i = 0; i < 4; i++)
@@ -414,7 +403,10 @@ int main(int argc, char ** argv)
 						if(i != id && i != gId)
 						{
 							if(nb[i])
-								tableCartes[i][aux] = 100;
+							{
+								if(tableCartes[i][aux] == -1)
+									tableCartes[i][aux] = 100;
+							}
 							else
 								tableCartes[i][aux] = 0;
 						}

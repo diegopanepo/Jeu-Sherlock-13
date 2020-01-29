@@ -7,6 +7,7 @@ The port number is passed as an argument */
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <time.h>
 
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -23,9 +24,9 @@ int fsmServer;
 int deck[13] = {0,1,2,3,4,5,6,7,8,9,10,11,12};
 int tableCartes[4][8];
 char *nomcartes[] =
-{"Sebastian Moran", "irene Adler", "inspector Lestrade",
-"inspector Gregson", "inspector Baynes", "inspector Bradstreet",
-"inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
+{"Sebastian Moran", "Irene Adler", "Inspector Lestrade",
+"Inspector Gregson", "Inspector Baynes", "Inspector Bradstreet",
+"Inspector Hopkins", "Sherlock Holmes", "John Watson", "Mycroft Holmes",
 "Mrs. Hudson", "Mary Morstan", "James Moriarty"};
 char *nomobjets[] =
 {"pipe", "ampoule", "poing", "couronne", "carnet", "collier", "oeil", "crane"};
@@ -43,6 +44,7 @@ void melangerDeck()
 	int i;
 	int index1,index2,tmp;
 
+	srand(time(0));
 	for(i = 0; i < 1000; i++)
 	{
 		index1 = rand() % 13;
@@ -224,6 +226,8 @@ int main(int argc, char *argv[])
 	int n;
 	int i;
 	int nb[4];
+	int perdus[] = {0,0,0,0};
+	int nb_perdus = 0;
 
 	char com;
 	char clientIpAddress[256], clientName[256];
@@ -231,6 +235,9 @@ int main(int argc, char *argv[])
 	int id;
 	char reply[256];
 	int aux, aux2;
+	int echec[3];
+	for(i = 0; i < 3; i++)
+		echec[i] = -1;
 
 	if (argc < 2) {
 		fprintf(stderr, "ERROR, no port provided\n");
@@ -336,29 +343,29 @@ int main(int argc, char *argv[])
 			{
 				case 'G':
 				// joueur accuse un personnage
-				// a tester
 					sscanf(buffer, "%c %d %d", &com, &id, &aux);
 					printf("COM=%c IdJoueur=%d personnage=%d\n", com, id, aux);
 					if(aux == deck[12])
 					{
-						printf("Le joueur %s a gagne la partie !", tcpClients[id].name);
+						printf("Le joueur %s a gagne la partie !\n", tcpClients[id].name);
+						printf("FIN DE LA PARTIE\n\n");
 						sprintf(reply, "R %d %d 1", id, aux);
-						fsmServer = -1;
+						broadcastMessage(reply);
+						joueurCourant = -2;
 					}
 					else
 					{
-						printf("Le joueur %s s'est trompe avec son accusation", tcpClients[id].name);
+						printf("Le joueur %s s'est trompe avec son accusation\n\n", tcpClients[id].name);
 						sprintf(reply, "R %d %d 0", id, aux);
-						//ajouter l'option de ne plus laisser jouer au joueur id
+						broadcastMessage(reply);
+						perdus[id] = 1;
+						nb_perdus++;
 					}
-					broadcastMessage(reply);
 					break;
 				case 'O':
 				// le joueur demande si les autres joueurs ont un objet
-				// a tester
 					sscanf(buffer, "%c %d %d", &com, &id, &aux);
 					printf("COM=%c IdJoueur=%d objet=%d\n", com, id, aux);
-					//bzero(buffer, 256);
 					for(i = 0; i < 4; i++)
 					{
 						if(i != id)
@@ -371,18 +378,29 @@ int main(int argc, char *argv[])
 					break;
 				case 'S':
 				// le joueur demande la quantite d'objets a un autre joueur
-				// a tester
 					sscanf(buffer, "%c %d %d %d", &com, &id, &aux, &aux2);
 					printf("COM=%c IdJoueur=%d joueurCible=%d objet=%d\n", com, id, aux, aux2);
 					sprintf(reply, "V %d %d %d", tableCartes[aux][aux2], aux, aux2);
 					sendMessageToClient(tcpClients[id].ipAddress, tcpClients[id].port, reply);
 					break;
+
 				default:
 					break;
 			}
 			joueurCourant++;
-			if(joueurCourant > 3)
-				joueurCourant = 0;
+			while(perdus[joueurCourant])
+			{
+				joueurCourant++;
+				if(joueurCourant > 3)
+					joueurCourant = 0;
+			}
+			if(nb_perdus == 3)
+			{
+				sprintf(reply, "R %d %d 1", joueurCourant, deck[12]);
+				broadcastMessage(reply);
+				break;
+			}
+
 			sprintf(reply,"M %d", joueurCourant);
 			broadcastMessage(reply);
 		}
