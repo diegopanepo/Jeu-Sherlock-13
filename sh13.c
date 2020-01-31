@@ -189,14 +189,14 @@ int main(int argc, char ** argv)
 	deck[11] = IMG_Load("SH13_11.png");
 	deck[12] = IMG_Load("SH13_12.png");
 
-	objet[0] = IMG_Load("SH13_pipe_120x120.png");
-	objet[1] = IMG_Load("SH13_ampoule_120x120.png");
-	objet[2] = IMG_Load("SH13_poing_120x120.png");
-	objet[3] = IMG_Load("SH13_couronne_120x120.png");
-	objet[4] = IMG_Load("SH13_carnet_120x120.png");
-	objet[5] = IMG_Load("SH13_collier_120x120.png");
-	objet[6] = IMG_Load("SH13_oeil_120x120.png");
-	objet[7] = IMG_Load("SH13_crane_120x120.png");
+	objet[0] = IMG_Load("SH13_pipe_120x120_inverse.png");
+	objet[1] = IMG_Load("SH13_ampoule_120x120_inverse.png");
+	objet[2] = IMG_Load("SH13_poing_120x120_inverse.png");
+	objet[3] = IMG_Load("SH13_couronne_120x120_inverse.png");
+	objet[4] = IMG_Load("SH13_carnet_120x120_inverse.png");
+	objet[5] = IMG_Load("SH13_collier_120x120_inverse.png");
+	objet[6] = IMG_Load("SH13_oeil_120x120_inverse.png");
+	objet[7] = IMG_Load("SH13_crane_120x120_inverse.png");
 
 	gobutton = IMG_Load("gobutton.png");
 	connectbutton = IMG_Load("connectbutton.png");
@@ -434,7 +434,7 @@ int main(int argc, char ** argv)
 		SDL_Rect dstrect_image = { 0, 0, 500, 330 };
 		SDL_Rect dstrect_image1 = { 0, 340, 250, 330/2 };
 
-		SDL_SetRenderDrawColor(renderer, 255, 230, 230, 230);
+		SDL_SetRenderDrawColor(renderer, 47, 156, 220, 230);
 		SDL_Rect rect = {0, 0, 1024, 768};
 		SDL_RenderFillRect(renderer, &rect);
 
