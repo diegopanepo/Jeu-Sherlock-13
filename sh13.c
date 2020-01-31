@@ -148,6 +148,7 @@ int main(int argc, char ** argv)
 	int id;
 	int aux, aux2;
 	int nb[4];
+	int gagn_perd = -1;
 
 	char code;
 	int joueurCourant;
@@ -172,7 +173,7 @@ int main(int argc, char ** argv)
 
 	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
 
-	SDL_Surface *deck[13],*objet[8],*gobutton,*connectbutton;
+	SDL_Surface *deck[13], *objet[8], *gobutton, *connectbutton, *res[2];
 
 	deck[0] = IMG_Load("SH13_0.png");
 	deck[1] = IMG_Load("SH13_1.png");
@@ -200,6 +201,9 @@ int main(int argc, char ** argv)
 	gobutton = IMG_Load("gobutton.png");
 	connectbutton = IMG_Load("connectbutton.png");
 
+	res[0] = IMG_Load("gagnant.png");
+	res[1] = IMG_Load("perdant.png");
+
 	strcpy(gNames[0], "-");
 	strcpy(gNames[1], "-");
 	strcpy(gNames[2], "-");
@@ -224,6 +228,7 @@ int main(int argc, char ** argv)
 	connectEnabled = 1;
 
 	SDL_Texture *texture_deck[13], *texture_gobutton, *texture_connectbutton, *texture_objet[8];
+	SDL_Texture *texture_res[2];
 
 	for (i = 0; i < 13; i++)
 		texture_deck[i] = SDL_CreateTextureFromSurface(renderer, deck[i]);
@@ -232,6 +237,8 @@ int main(int argc, char ** argv)
 
 	texture_gobutton = SDL_CreateTextureFromSurface(renderer, gobutton);
 	texture_connectbutton = SDL_CreateTextureFromSurface(renderer, connectbutton);
+	texture_res[0] = SDL_CreateTextureFromSurface(renderer, res[0]);
+	texture_res[1] = SDL_CreateTextureFromSurface(renderer, res[1]);
 
 	TTF_Font* Sans = TTF_OpenFont("sans.ttf", 15);
 	printf("Sans=%p\n", Sans);
@@ -253,7 +260,7 @@ int main(int argc, char ** argv)
 					break;
 				case SDL_MOUSEBUTTONDOWN:
 					SDL_GetMouseState( &mx, &my );
-					//printf("mx=%d my=%d\n",mx,my);////
+					printf("mx=%d my=%d\n",mx,my);////
 					if ((mx<200) && (my<50) && (connectEnabled == 1))
 					{
 						//appui sur la bouton CONNECT
@@ -402,12 +409,18 @@ int main(int argc, char ** argv)
 						printf("Le joueur %s a gagne la partie !\n", gNames[id]);
 						printf("Le tueur est %s\n\n", nbnoms[aux]);
 						goEnabled = 0;
+						if(id == gId)
+							gagn_perd = 1;
+						else
+							gagn_perd = 0;
 						//la partie est finie
 					}
 					else
 					{
 						printf("Le joueur %s n'a pas demasque le tueur\nLa partie continue\n\n",
 						gNames[id]);
+						if(id == gId)
+							gagn_perd = 0;
 						//le joueur ne joue plus
 					}
 					break;
@@ -723,7 +736,7 @@ int main(int argc, char ** argv)
 		// Le bouton go
 		if (goEnabled == 1)
 		{
-			SDL_Rect dstrect = { 500, 350, 200, 150 };
+			SDL_Rect dstrect = { 425, 350, 200, 150 };
 			SDL_RenderCopy(renderer, texture_gobutton, NULL, &dstrect);
 		}
 		// Le bouton connect
@@ -731,6 +744,18 @@ int main(int argc, char ** argv)
 		{
 			SDL_Rect dstrect = { 0, 0, 200, 50 };
 			SDL_RenderCopy(renderer, texture_connectbutton, NULL, &dstrect);
+		}
+
+		//afficher message de victoire ou defaite
+		if(gagn_perd == 1)
+		{
+			SDL_Rect dstrect = {410, 535, 275, 200};
+			SDL_RenderCopy(renderer, texture_res[0], NULL, &dstrect);
+		}
+		else if(gagn_perd == 0)
+		{
+			SDL_Rect dstrect = {400, 530, 300, 200};
+			SDL_RenderCopy(renderer, texture_res[1], NULL, &dstrect);
 		}
 
 		//SDL_SetRenderDrawColor(renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
