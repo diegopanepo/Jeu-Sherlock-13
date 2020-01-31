@@ -274,7 +274,7 @@ int main(int argc, char *argv[])
 		newsockfd = accept(sockfd,(struct sockaddr *) &cli_addr, &clilen);
 		if (newsockfd < 0)
 			error("ERROR on accept");
-		printf("\nConnextion accepte\n");
+		printf("\nConnexion accepte\n");
 
 		bzero(buffer, 256);
 		n = read(newsockfd, buffer, 255);

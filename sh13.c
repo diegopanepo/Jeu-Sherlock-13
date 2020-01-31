@@ -290,7 +290,7 @@ int main(int argc, char ** argv)
 					else if ((mx>=500) && (mx<700) && (my>=350) && (my<450) && (goEnabled == 1))
 					{
 						//appui sur la bouton GO
-						printf("go! joueur=%d objet=%d guilt=%d\n\n",joueurSel, objetSel, guiltSel);
+						printf("GO! joueur=%d objet=%d guilt=%d\n\n",joueurSel, objetSel, guiltSel);
 						if (guiltSel != -1)
 						{
 							//le joueur accuse un personnage
@@ -376,24 +376,6 @@ int main(int argc, char ** argv)
 					else
 						printf("Le joueur %s n'avait pas l'objet %s\n\n", gNames[id], nomobjets[aux2]);
 					break;
-				case 'R':
-				// Message 'R' : resultat de l'accusation final d'un joueur
-					sscanf(gbuffer, "%c %d %d %d", &code, &id, &aux, &aux2); // personnage 1/0
-					if(aux2)
-					{
-						printf("Le joueur %s a gagne la partie !\n", gNames[id]);
-						printf("Le tueur est %s\n\n", nbnoms[aux]);
-						goEnabled = 0;
-						//la partie est finie
-					}
-					else
-					{
-						printf("Le joueur %s n'a pas demasque le tueur\nLa partie continue\n\n",
-							gNames[id]);
-						//le joueur ne joue plus
-					}
-
-					break;
 				case 'o':
 				// Message 'o' : reponse de la demande d'objet a tout le monde
 					sscanf(gbuffer, "%c %d %d %d %d %d %d", &code, &id, &aux, //objet
@@ -411,7 +393,25 @@ int main(int argc, char ** argv)
 								tableCartes[i][aux] = 0;
 						}
 					}
-
+					break;
+				case 'R':
+					// Message 'R' : resultat de l'accusation final d'un joueur
+					sscanf(gbuffer, "%c %d %d %d", &code, &id, &aux, &aux2); // personnage 1/0
+					if(aux2)
+					{
+						printf("Le joueur %s a gagne la partie !\n", gNames[id]);
+						printf("Le tueur est %s\n\n", nbnoms[aux]);
+						goEnabled = 0;
+						//la partie est finie
+					}
+					else
+					{
+						printf("Le joueur %s n'a pas demasque le tueur\nLa partie continue\n\n",
+						gNames[id]);
+						//le joueur ne joue plus
+					}
+					break;
+				default:
 					break;
 			}
 			synchro=0;
